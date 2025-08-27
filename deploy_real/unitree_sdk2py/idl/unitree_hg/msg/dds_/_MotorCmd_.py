@@ -22,12 +22,72 @@ import cyclonedds.idl.types as types
 @annotate.final
 @annotate.autoid("sequential")
 class MotorCmd_(idl.IdlStruct, typename="unitree_hg.msg.dds_.MotorCmd_"):
-    mode: types.uint8
-    q: types.float32
-    dq: types.float32
-    tau: types.float32
-    kp: types.float32
-    kd: types.float32
-    reserve: types.uint32
+    mode: types.uint8       # 电机控制模式 0:Disable, 1:Enable
+    q: types.float32        # 关节目标位置
+    dq: types.float32       # 关节目标速度
+    tau: types.float32      # 关节前馈力矩
+    kp: types.float32       # 关节刚度系数
+    kd: types.float32       # 关节阻尼系数
+    reserve: types.uint32   # 保留 
 
 
+'''
+mode: types.uint8
+
+含义: 电机模式。这是一个开关，用于启用或禁用电机。
+0: 禁用 (Disable)。电机将处于失能状态，不会响应任何其他指令，通常会变得松弛（零力矩）。这是最安全的模式。
+1: 启用 (Enable)。电机将进入伺服控制模式，并开始根据下面其他字段的指令来运动。
+注意: 在宇树的某些SDK中，这个 mode 字段可能被用作更复杂的位掩码（bitmask），就像我们之前在 g1_highlevel_hand.py 中看到的 _RIS_Mode 一样，不同的位可能代表不同的子模式。但根据这里的注释，它主要用作一个简单的开关。
+
+q: types.float32
+
+含义: 目标位置 (Target Position)。这是你希望关节运动到的目标角度，单位通常是弧度 (radians)。这是位置控制模式下的核心指令。
+
+dq: types.float32
+
+含义: 目标速度 (Target Velocity)。这是你希望关节运动的目标角速度，单位通常是弧度/秒 (radians/second)。在一些高级控制模式（如速度控制或轨迹跟踪）中会用到。在基本的位置控制中，它通常被设为 0.0。
+
+tau: types.float32
+
+含义: 前馈力矩 (Feedforward Torque)。这是一个预测性的力矩值，单位是牛顿·米 (N·m)。它的作用是帮助控制器“预先”施加一个力，以抵消已知的外部力，最常见的就是重力补偿。通过提供一个准确的前馈力矩，可以大大提高跟踪精度，并减轻PID控制器的负担。例如，当手臂水平伸出时，重力会产生一个很大的力矩，tau 就可以用来抵消这个力矩。
+
+kp: types.float32
+
+含义: 比例增益 (Proportional Gain)，也常被称为刚度系数 (Stiffness Coefficient)。这是PID控制器中的“P”项。它决定了电机对位置误差的响应强度。
+高 kp: 意味着电机像一个硬弹簧。当有外力试图将它推离目标位置 q 时，它会产生一个很大的反作用力来抵抗。这使得关节非常“硬”，位置精度高，但可能会导致振荡或不稳定。
+低 kp: 意味着电机像一个软弹簧。它允许在外力下有一定的偏离，关节感觉更“软”，更顺从。
+kp = 0: 电机没有位置修正力，但如果 kd 非零，它仍然会有阻尼。
+
+kd: types.float32
+
+含义: 微分增益 (Derivative Gain)，也常被称为阻尼系数 (Damping Coefficient)。这是PID控制器中的“D”项。它决定了电机对运动速度的响应强度，主要作用是抑制振荡，使运动更平滑稳定。
+高 kd: 意味着电机像在粘稠的液体中运动，阻力很大。这能有效防止过冲和振荡，但可能会使响应变慢。
+低 kd: 阻尼小，电机响应快，但更容易产生振荡。
+kd = 0: 没有阻尼，电机可能会在目标位置附近持续振荡。
+
+reserve: types.uint32
+
+含义: 保留字段。这个字段目前没有被使用，是为未来功能扩展而保留的。发送指令时通常将其设为0。
+
+
+组合工作方式：一个经典的力位混合控制
+这些字段组合在一起，实现了一种非常经典和强大的机器人控制律，通常被称为阻抗控制 (Impedance Control) 或 力位混合控制 (Hybrid Force/Position Control)。
+
+底层的电机控制器通常会根据以下公式来计算最终施加给电机的力矩 τ_cmd:
+
+τ_cmd = kp * (q - q_actual) + kd * (dq - dq_actual) + tau
+
+其中：
+
+q_actual 和 dq_actual 是电机编码器读回的实际位置和速度。
+kp * (q - q_actual): 比例项。这是位置误差产生的“弹簧力”，它将关节拉向目标位置 q。
+kd * (dq - dq_actual): 微分项。这是速度误差产生的“阻尼力”，它使运动变得平滑稳定。
+tau: 前馈项。这是预先计算好的补偿力矩。
+通过调整 kp 和 kd，你可以灵活地改变机器人的行为：
+
+高刚度定位: 设置一个高的 kp 和一个合适的 kd。机器人会非常精确地保持在 q 位置，并抵抗外部干扰。
+柔顺交互: 设置一个低的 kp 和一个合适的 kd。机器人会尝试到达 q，但允许人类用户或环境轻易地将其推开，这在人机协作中非常重要。
+零力矩/失能: 设置 mode = 0，或者 kp = 0, kd = 0, tau = 0。电机关节将变得完全松弛，可以被自由拖动。
+纯阻尼模式: 设置 kp = 0, tau = 0，但 kd 是一个正值。电机没有目标位置，但运动时会有阻尼感，像一个旋转门。
+在 g1_high_level_controller.py 中，_send_joint 函数就是将高层计算出的 q, kps, kds 填入这个 MotorCmd_ 结构体，然后通过DDS发送给底层执行的。
+'''
