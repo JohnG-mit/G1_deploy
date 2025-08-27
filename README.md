@@ -32,7 +32,7 @@ Please refer to the official RL setup from unitree:
 pip install numpy opencv-python scipy PyYAML pinocchio casadi pyrealsense2 torch
 
 # Install Unitree SDK2 Python bindings manually
-# Install QRDet (https://github.com/NVlabs/qrdet)
+# Install QRDet (https://github.com/Eric-Canas/qrdet)
 ```
 
 ---
@@ -85,7 +85,7 @@ The recorded traj will be saved to `records`, you can type the name of the traj 
 - Detect QR codes via RealSense + QRDet
 - Estimate distance + angle
 - Trigger sequence B only if within spatial & angular bounds for N seconds
-- Writes `l2_trigger_state.txt` to record event
+- Writes `.txt` to record event
 
 ---
 
