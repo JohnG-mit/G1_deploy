@@ -11,6 +11,7 @@ from .unitree_hg.msg.dds_ import LowCmd_ as HGLowCmd_
 from .unitree_hg.msg.dds_ import LowState_ as HGLowState_
 from .unitree_hg.msg.dds_ import MotorCmd_ as HGMotorCmd_
 from .unitree_hg.msg.dds_ import MotorState_ as HGMotorState_
+from .unitree_hg.msg.dds_ import BmsCmd_ as HGBmsCmd_
 from .unitree_hg.msg.dds_ import BmsState_ as HGBmsState_
 from .unitree_hg.msg.dds_ import IMUState_ as HGIMUState_
 from .unitree_hg.msg.dds_ import MainBoardState_ as HGMainBoardState_

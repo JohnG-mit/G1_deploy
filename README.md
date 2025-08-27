@@ -243,9 +243,9 @@ Input to policy includes:
 
 ## 🔗 References
 
-- [PBHC (KungfuBot)](https://github.com/shi-soul/KungfuBot)
+- [PBHC (KungfuBot)](https://github.com/TeleHuman/PBHC)
 - [Unitree SDK2](https://github.com/unitreerobotics/unitree_sdk2)
-- [QRDet](https://github.com/NVlabs/qrdet)
+- [QRDet](https://github.com/Eric-Canas/qrdet)
 
 ---
 
