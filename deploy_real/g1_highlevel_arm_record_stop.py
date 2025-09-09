@@ -1,4 +1,5 @@
 # G1 Arm Motion Recorder with Looping Segments and Damping Mode
+import os
 import time
 import sys
 import numpy as np
@@ -13,38 +14,52 @@ from common.remote_controller import RemoteController, KeyMap
 # G1 Joint Index
 # -----------------------------------------------------------------------------
 class G1JointIndex:
+    LeftLegHipPitch = 0
+    LeftLegHipRoll = 1
+    LeftLegHipYaw = 2
+    LeftLegKnee = 3
+    LeftLegAnklePitch = 4
+    LeftLegAnkleRoll = 5
+    RightLegHipPitch = 6
+    RightLegHipRoll = 7
+    RightLegHipYaw = 8
+    RightLegKnee = 9
+    RightLegAnklePitch = 10
+    RightLegAnkleRoll = 11
+    WaistYaw = 12
+    WaistRoll = 13
+    WaistPitch = 14
     LeftShoulderPitch = 15
     LeftShoulderRoll = 16
     LeftShoulderYaw = 17
     LeftElbow = 18
+    LeftWristRoll = 19
+    LeftWristPitch = 20
+    LeftWristYaw = 21
     RightShoulderPitch = 22
     RightShoulderRoll = 23
     RightShoulderYaw = 24
     RightElbow = 25
-    WaistYaw = 12
-    WaistRoll = 13
-    WaistPitch = 14
-    LeftWristRoll = 19
-    LeftWristPitch = 20
-    LeftWristYaw = 21
     RightWristRoll = 26
     RightWristPitch = 27
     RightWristYaw = 28
     kNotUsedJoint = 29
+
+file_dir = os.path.dirname(os.path.abspath(__file__))
 
 # -----------------------------------------------------------------------------
 # Config loader
 # -----------------------------------------------------------------------------
 class Config: pass
 
-def load_cfg(yaml_path="deploy_real/configs/config_high_level.yaml") -> Config:
+def load_cfg(yaml_path=os.path.join(file_dir, "configs/config_high_level.yaml")) -> Config:
     with open(yaml_path, 'r') as f:
         d = yaml.safe_load(f)
     cfg = Config()
     for k, v in d.items():
         setattr(cfg, k, np.array(v) if isinstance(v, list) else v)
-    cfg.kps_record = cfg.kps_play * 1
-    cfg.kds_record = cfg.kds_play * 1
+    cfg.kps_record = cfg.kps * 1
+    cfg.kds_record = cfg.kds * 1
     return cfg
 
 cfg = load_cfg()
@@ -79,6 +94,11 @@ class CustomRecorder:
         # while not self.first_state: 
         #     time.sleep(0.1)
         # self.thread.Start()
+        for i in range(29):
+            self.low_cmd.motor_cmd[i].kp = 0
+            self.low_cmd.motor_cmd[i].kd = 8
+        for _ in range(50):
+            self.arm_pub.Write(self.low_cmd)
 
         self.thread = RecurrentThread(interval=cfg.control_dt, target=self.Loop, name="control")
         while not self.first_state: 
@@ -104,17 +124,17 @@ class CustomRecorder:
         kds_record: list[float] = []
         for idx, joint in enumerate(cfg.action_joints):
             if joint in [G1JointIndex.WaistRoll, G1JointIndex.WaistPitch]:
-                kps_record.append(cfg.kps_play[idx] * cfg.stiffness_factor_waist_rp)
-                kds_record.append(cfg.kds_play[idx] * cfg.stiffness_factor_waist_rp)
+                kps_record.append(cfg.kps[idx] * cfg.stiffness_factor_waist_rp)
+                kds_record.append(cfg.kds[idx] * cfg.stiffness_factor_waist_rp)
             else:
-                kps_record.append(cfg.kps_play[idx] * cfg.stiffness_factor)
-                kds_record.append(cfg.kds_play[idx] * cfg.stiffness_factor)
+                kps_record.append(cfg.kps[idx] * cfg.stiffness_factor)
+                kds_record.append(cfg.kds[idx] * cfg.stiffness_factor)
 
         # build command each cycle
         if self.recording:
             kp_arr, kd_arr = kps_record, kds_record
         else:
-            kp_arr, kd_arr = cfg.kps_play, cfg.kds_play
+            kp_arr, kd_arr = cfg.kps, cfg.kds
 
         for i, m in enumerate(cfg.action_joints):
             self.low_cmd.motor_cmd[m].q = float(self.current_target_q[i])
@@ -123,12 +143,12 @@ class CustomRecorder:
             self.low_cmd.motor_cmd[m].kd = float(kd_arr[i])
             self.low_cmd.motor_cmd[m].tau = 0.0
 
-        for i, m in enumerate(cfg.fixed_joints):
-            self.low_cmd.motor_cmd[m].q = float(cfg.fixed_target[i])
-            self.low_cmd.motor_cmd[m].dq = 0.0
-            self.low_cmd.motor_cmd[m].kp = float(cfg.fixed_kps[i])
-            self.low_cmd.motor_cmd[m].kd = float(cfg.fixed_kds[i])
-            self.low_cmd.motor_cmd[m].tau = 0.0
+        # for i, m in enumerate(cfg.fixed_joints):
+        #     self.low_cmd.motor_cmd[m].q = float(cfg.fixed_target[i])
+        #     self.low_cmd.motor_cmd[m].dq = 0.0
+        #     self.low_cmd.motor_cmd[m].kp = float(cfg.fixed_kps[i])
+        #     self.low_cmd.motor_cmd[m].kd = float(cfg.fixed_kds[i])
+        #     self.low_cmd.motor_cmd[m].tau = 0.0
 
         self.low_cmd.motor_cmd[G1JointIndex.kNotUsedJoint].q = 1
         self.low_cmd.crc = self.crc.Crc(self.low_cmd)
@@ -150,6 +170,7 @@ class CustomRecorder:
         self.current_target_q = cfg.default_angles.copy()
 
     def Run(self):
+        os.makedirs(os.path.join(file_dir, "records"), exist_ok=True)
         self.move_to_default()
         print("[RECORD] Press A to start, B to stop/save, Y to finish, X to reset")
         seg_id = 1
@@ -166,7 +187,7 @@ class CustomRecorder:
             elif self.recording and self.remote.button[KeyMap.B] == 1:  # B
                 self.recording = False
                 self.current_target_q = self.record_buffer_q[-1]
-                np.savez_compressed(f"segment_{seg_id:02d}.npz",
+                np.savez_compressed(os.path.join(file_dir, "records", f"segment_{seg_id:02d}.npz"),
                     t=np.array(self.record_buffer_t),
                     q=np.vstack(self.record_buffer_q))
                 print(f"[SAVE] segment_{seg_id:02d}.npz saved")
@@ -174,10 +195,11 @@ class CustomRecorder:
 
             elif (self.remote.button[KeyMap.Y] == 1):  # Y
                 print("[RECORD] Finish and enter damping mode")
-                for i in cfg.action_joints:
+                for i in range(29):
                     self.low_cmd.motor_cmd[i].kp = 0
-                    self.low_cmd.motor_cmd[i].kd = 1
-                self.arm_pub.Write(self.low_cmd)
+                    self.low_cmd.motor_cmd[i].kd = 8
+                for _ in range(20):
+                    self.arm_pub.Write(self.low_cmd)
 
                 print("Press X to return to default")
                 while True:

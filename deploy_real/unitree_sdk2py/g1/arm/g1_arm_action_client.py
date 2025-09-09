@@ -1,7 +1,17 @@
 import json
+import sys
+import os
 
-from ...rpc.client import Client
-from .g1_arm_action_api import *
+# --- Start of fix ---
+# Add the project root to sys.path to resolve imports.
+# The project root is 3 levels up from this file's directory, which is 'deploy_real'.
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.insert(0, project_root)
+# --- End of fix ---
+
+from unitree_sdk2py.rpc.client import Client
+from unitree_sdk2py.g1.arm.g1_arm_action_api import *
+from unitree_sdk2py.core.channel import ChannelFactoryInitialize # <--- 导入初始化函数
 
 action_map = {
     "release arm": 99,
@@ -54,3 +64,11 @@ class G1ArmActionClient(Client):
             return code, json.loads(data)
         else:
             return code, None
+
+ChannelFactoryInitialize(0, sys.argv[1] if len(sys.argv) > 1 else "")
+armc = G1ArmActionClient()
+armc.Init()
+code, action_list = armc.GetActionList()
+print(action_list)
+res = armc.ExecuteAction(action_map["shake hand"])
+print(res)
