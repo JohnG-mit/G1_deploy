@@ -7,7 +7,8 @@ from multiprocessing import Process
 from pynput import keyboard
 
 from unitree_sdk2py.core.channel import ChannelPublisher, ChannelSubscriber, ChannelFactoryInitialize
-from unitree_sdk2py.idl.default import unitree_hg_msg_dds__LowCmd_, unitree_hg_msg_dds__LowState_
+from unitree_sdk2py.comm.motion_switcher import MotionSwitcherClient
+from unitree_sdk2py.idl.default import *
 from unitree_sdk2py.idl.unitree_hg.msg.dds_ import LowCmd_, LowState_
 from unitree_sdk2py.utils.crc import CRC
 from unitree_sdk2py.utils.thread import RecurrentThread
@@ -76,6 +77,21 @@ def create_zero_cmd(cmd: LowCmd_):
         cmd.motor_cmd[i].kd = 0
         cmd.motor_cmd[i].tau = 0
 
+def queryServiceName(form: str, name: str) -> str:
+    if form == "0":
+        if name == "normal":
+            return "sport_mode"
+        if name == "ai":
+            return "ai_sport"
+        if name == "advanced":
+            return "advanced_sport"
+    else:
+        if name == "ai-w":
+            return "wheeled_sport(go2W)"
+        if name == "normal-w":
+            return "wheeled_sport(b2W)"
+    return ""
+
 class Config: pass
 
 def load_cfg(path=os.path.join(file_dir, "configs/config_high_level.yaml")) -> Config:
@@ -107,7 +123,19 @@ class ControlHandler:
         self.lowstate_subscriber = ChannelSubscriber("rt/lowstate", LowState_)
         self.lowstate_subscriber.Init(self.LowStateHgHandler, 10)
 
+        self.msc = MotionSwitcherClient()
+        self.msc.SetTimeout(5.0)
+        self.msc.Init()
+
         self.wait_for_low_state()
+        while self.queryMotionStatus():
+            print("Try to deactivate the motion control-related service.")
+            ret, _ = self.msc.ReleaseMode()
+            if ret == 0:
+                print("ReleaseMode succeeded.")
+            else:
+                print(f"ReleaseMode failed. Error code: {ret}")
+            time.sleep(5)
 
         init_cmd_hg(self.low_cmd, mode_machine=self.mode_machine_, mode_pr=self.mode_pr_)  # activate G1 motor
 
@@ -132,9 +160,26 @@ class ControlHandler:
     def send_cmd(self, cmd: LowCmd_):
         cmd.crc = CRC().Crc(cmd)
         self.lowcmd_publisher_.Write(cmd)
+    
+    def queryMotionStatus(self):
+        code, data = self.msc.CheckMode()
+        if code == 0:
+            print("CheckMode succeeded.")
+            print(data)
+        else:
+            print(f"CheckMode failed. Error code: {code}")
+
+        if not data["name"]:
+            print("The motion control-related service is deactivated.")
+            motionStatus = 0
+        else:
+            serviceName = queryServiceName(data["form"], data["name"])
+            print(f"Service: {serviceName} is activate")
+            motionStatus = 1
+        return motionStatus
 
     def start(self):
-        print("Entering damping mode for a short period...")
+        # print("Entering damping mode for a short period...")
         # for _ in range(50):  # 持续发送50次阻尼指令 (大约1秒)
         #     self.enter_damping_mode()
         #     time.sleep(self.control_dt)
