@@ -301,5 +301,5 @@ if __name__ == "__main__":
         cfg.write_text(json.dumps(data, indent=2))
         print("[Livox2] Wrote default mid360_config.json with host_ip", host_ip)
 
-    lidar = Livox2(cfg, host_ip="192.168.123.222")
+    lidar = Livox2(cfg, host_ip="192.168.123.225")
     lidar.spin()
