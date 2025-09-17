@@ -12,7 +12,7 @@ from unitree_sdk2py.utils.thread import Thread
 
 from inspire_sdkpy import inspire_sdk, inspire_hand_defaut,inspire_dds
 
-handler=inspire_sdk.ModbusDataHandler(ip='192.168.123.211',LR='r',device_id=1)
+handler=inspire_sdk.ModbusDataHandler(ip='192.168.123.210',LR='l',device_id=1)
 states_structure = [
     ('pos_act', 1534, 6, 'short'),
     ('angle_act', 1546, 6, 'short'),
@@ -52,7 +52,7 @@ user_def_angle = [
 # pubr.Init()
 # cmd = inspire_hand_defaut.get_inspire_hand_ctrl()
 
-handler.client.write_register(gesture_no_set[0], 8, handler.device_id)
+handler.client.write_register(gesture_no_set[0], 9, handler.device_id)
 print(handler.read_and_parse_registers(1056, user_def_angle[0][2], user_def_angle[0][3]))
 print(handler.read_and_parse_registers(user_def_angle[0][1], user_def_angle[0][2], user_def_angle[0][3]))
 # print(handler.read_and_parse_registers(user_def_angle[-1][1], 120, user_def_angle[-1][3]))

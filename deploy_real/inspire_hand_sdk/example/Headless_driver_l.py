@@ -22,10 +22,10 @@ if __name__ == "__main__":
             time.sleep(0.001)  # 暂停 5 毫秒
 
             # 每秒计算并打印一次调用频率
-            if call_count % 10 == 0:  # 每 200 次调用计算一次频率
-                elapsed_time = time.perf_counter() - start_time  # 计算总耗时
-                frequency = call_count / elapsed_time  # 计算频率 (Hz)
-                print(f"当前频率: {frequency:.2f} Hz, 调用次数: {call_count}, 耗时: {elapsed_time:.6f} 秒")
+            # if call_count % 10 == 0:  # 每 200 次调用计算一次频率
+            #     elapsed_time = time.perf_counter() - start_time  # 计算总耗时
+            #     frequency = call_count / elapsed_time  # 计算频率 (Hz)
+            #     print(f"当前频率: {frequency:.2f} Hz, 调用次数: {call_count}, 耗时: {elapsed_time:.6f} 秒")
     except KeyboardInterrupt:
         elapsed_time = time.perf_counter() - start_time  # 计算总耗时
         frequency = call_count / elapsed_time if elapsed_time > 0 else 0  # 计算最终频率
