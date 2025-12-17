@@ -272,7 +272,7 @@ class Livox2:
 
 
 if __name__ == "__main__":
-    cfg = Path("mid360_config.json")
+    cfg = Path("/home/johng/repo/G1_deploy/deploy_real/lidar_vision/mid360_config.json")
     if not cfg.exists():
         # generate a bare-bones config for 192.168.123.222
         host_ip = os.environ.get("HOST_IP", "192.168.123.222")

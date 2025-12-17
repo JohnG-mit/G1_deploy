@@ -133,7 +133,7 @@ class LiveViewer(_Livox):
         # SDK2 requires a JSON config path; SDK1 does not.  Try the new API
         # first and gracefully fall back if the signature does not match.
         if _SDK2:
-            super().__init__("mid360_config.json", host_ip="192.168.123.222")  # type: ignore[arg-type]
+            super().__init__("/home/johng/repo/G1_deploy/deploy_real/lidar_vision/mid360_config.json", host_ip="192.168.123.225")  # type: ignore[arg-type]
         else:
             super().__init__()  # SDK1 has no required arguments
 
