@@ -12,7 +12,7 @@ def worker(ip,LR,name,network=None):
     try:
         while True:
             data_dict = handler.read()
-            print(data_dict)
+            # print(data_dict)
             call_count += 1
             time.sleep(0.001)
             
