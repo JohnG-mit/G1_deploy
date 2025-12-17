@@ -94,7 +94,7 @@ def queryServiceName(form: str, name: str) -> str:
 
 class Config: pass
 
-def load_cfg(path=os.path.join(file_dir, "configs/config_high_level.yaml")) -> Config:
+def load_cfg(path=os.path.join(file_dir, "configs/config_high_level_bak.yaml")) -> Config:
     with open(path, 'r') as f:
         d = yaml.safe_load(f)
     cfg = Config()
@@ -106,7 +106,7 @@ def load_cfg(path=os.path.join(file_dir, "configs/config_high_level.yaml")) -> C
 
 class ControlHandler:
     def __init__(self):
-        config = load_cfg(path = os.path.join(file_dir, "configs/config_high_level.yaml"))
+        config = load_cfg(path = os.path.join(file_dir, "configs/config_high_level_bak.yaml"))
         # config = load_cfg(path = os.path.join(file_dir, "configs/FixedPose.yaml"))
 
         self.control_dt = config.control_dt

@@ -25,8 +25,6 @@ from inspire_sdkpy.inspire_dds import inspire_hand_touch, inspire_hand_state, in
 
 from common.remote_controller import RemoteController, KeyMap
 from g1_arm_IK import G1_29_ArmIK
-from g1_highlevel_hand import Dex3GestureController, HandGesture, _RIS_Mode, _getch
-from vision_detector import VisionQRDetector
 
 # -----------------------------------------------------------------------------
 # G1 Joint Index

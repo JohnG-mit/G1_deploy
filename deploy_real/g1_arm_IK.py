@@ -24,48 +24,73 @@ class G1_29_ArmIK:
         self.Visualization = Visualization
 
         if not self.Unit_Test:
-            self.robot = pin.RobotWrapper.BuildFromURDF('deploy_real/assets/g1_body29_hand14.urdf', 'deploy_real/assets/')
+            # self.robot = pin.RobotWrapper.BuildFromURDF('deploy_real/assets/g1_body29_hand14.urdf', 'deploy_real/assets/')
+            self.robot = pin.RobotWrapper.BuildFromURDF('deploy_real/assets/g1_29dof_rev_1_0_with_inspire_hand_FTP.urdf', 'deploy_real/assets/')
         else:
-            self.robot = pin.RobotWrapper.BuildFromURDF('deploy_real/assets/g1_body29_hand14.urdf', 'deploy_real/assets/') # for test
+            # self.robot = pin.RobotWrapper.BuildFromURDF('deploy_real/assets/g1_body29_hand14.urdf', 'deploy_real/assets/') # for test
+            self.robot = pin.RobotWrapper.BuildFromURDF('deploy_real/assets/g1_29dof_rev_1_0_with_inspire_hand_FTP.urdf', 'deploy_real/assets/') # for test
+
+        # print("=========== FULL MODEL JOINTS ===========")
+        # for idx, name in enumerate(self.robot.model.names):
+        #     # Pinocchio: jointId starts at 1 (0 是 universe)
+        #     joint_id = self.robot.model.getJointId(name)
+        #     print(f"[full] idx={idx:2d}  jointId={joint_id:2d}  name={name}")
+        # exit()
 
         self.mixed_jointsToLockIDs = [
-                                        "left_hip_pitch_joint" ,
-                                        "left_hip_roll_joint" ,
-                                        "left_hip_yaw_joint" ,
-                                        "left_knee_joint" ,
-                                        "left_ankle_pitch_joint" ,
-                                        "left_ankle_roll_joint" ,
-                                        "right_hip_pitch_joint" ,
-                                        "right_hip_roll_joint" ,
-                                        "right_hip_yaw_joint" ,
-                                        "right_knee_joint" ,
-                                        "right_ankle_pitch_joint" ,
-                                        "right_ankle_roll_joint" ,
-                                        "waist_yaw_joint" ,
-                                        "waist_roll_joint" ,
-                                        "waist_pitch_joint" ,
-                                        
-                                        "left_wrist_pitch_joint",   # lock wrist pitch and yaw for simple control
-                                        # "left_wrist_yaw_joint",
-                                        "right_wrist_pitch_joint",
-                                        # "right_wrist_yaw_joint",
+            # === 两条腿 ===
+            "left_hip_pitch_joint",
+            "left_hip_roll_joint",
+            "left_hip_yaw_joint",
+            "left_knee_joint",
+            "left_ankle_pitch_joint",
+            "left_ankle_roll_joint",
+            "right_hip_pitch_joint",
+            "right_hip_roll_joint",
+            "right_hip_yaw_joint",
+            "right_knee_joint",
+            "right_ankle_pitch_joint",
+            "right_ankle_roll_joint",
 
-                                        "left_hand_thumb_0_joint" ,
-                                        "left_hand_thumb_1_joint" ,
-                                        "left_hand_thumb_2_joint" ,
-                                        "left_hand_middle_0_joint" ,
-                                        "left_hand_middle_1_joint" ,
-                                        "left_hand_index_0_joint" ,
-                                        "left_hand_index_1_joint" ,
-                                        
-                                        "right_hand_thumb_0_joint" ,
-                                        "right_hand_thumb_1_joint" ,
-                                        "right_hand_thumb_2_joint" ,
-                                        "right_hand_index_0_joint" ,
-                                        "right_hand_index_1_joint" ,
-                                        "right_hand_middle_0_joint",
-                                        "right_hand_middle_1_joint"
-                                    ]
+            # === 腰部 ===
+            "waist_yaw_joint",
+            "waist_roll_joint",
+            "waist_pitch_joint",
+
+            # === 腕部 ===
+            "left_wrist_pitch_joint",
+            # "left_wrist_yaw_joint",
+            "right_wrist_pitch_joint",
+            # "right_wrist_yaw_joint",
+
+            # === 所有左手手指关节 ===
+            "left_index_1_joint",
+            "left_index_2_joint",
+            "left_little_1_joint",
+            "left_little_2_joint",
+            "left_middle_1_joint",
+            "left_middle_2_joint",
+            "left_ring_1_joint",
+            "left_ring_2_joint",
+            "left_thumb_1_joint",
+            "left_thumb_2_joint",
+            "left_thumb_3_joint",
+            "left_thumb_4_joint",
+
+            # === 所有右手手指关节 ===
+            "right_index_1_joint",
+            "right_index_2_joint",
+            "right_little_1_joint",
+            "right_little_2_joint",
+            "right_middle_1_joint",
+            "right_middle_2_joint",
+            "right_ring_1_joint",
+            "right_ring_2_joint",
+            "right_thumb_1_joint",
+            "right_thumb_2_joint",
+            "right_thumb_3_joint",
+            "right_thumb_4_joint",
+        ]
 
         self.reduced_robot = self.robot.buildReducedRobot(
             list_of_joints_to_lock=self.mixed_jointsToLockIDs,
@@ -76,7 +101,7 @@ class G1_29_ArmIK:
             pin.Frame('L_ee',
                       self.reduced_robot.model.getJointId('left_wrist_yaw_joint'),
                       pin.SE3(np.eye(3),
-                              np.array([0.05,0,0]).T),
+                              np.array([0.15,0,0]).T),
                       pin.FrameType.OP_FRAME)
         )
         
@@ -84,7 +109,7 @@ class G1_29_ArmIK:
             pin.Frame('R_ee',
                       self.reduced_robot.model.getJointId('right_wrist_yaw_joint'),
                       pin.SE3(np.eye(3),
-                              np.array([0.05,0,0]).T),
+                              np.array([0.15,0,0]).T),
                       pin.FrameType.OP_FRAME)
         )
 
@@ -554,6 +579,8 @@ def circular_offset(t, r=0.04, T=5.0):
     """给定时间 t返回在 y-z 平面的小圆形偏移 (dy, dz)。"""
     theta = (t % T) / T * tau      # 映射到 [0, 2π)
     return np.array([0.0, r * cos(theta), r * sin(theta)])
+
+
 if __name__ == "__main__":
     ik = G1_29_ArmIK(Unit_Test=True, Visualization=True)
 
@@ -576,12 +603,12 @@ if __name__ == "__main__":
             L_test = pin.SE3(pin.Quaternion(1, 0.2, 0, 0), np.array([0.3027, 0.19896, 0.19488]))
 
             R0, R1 = Rotation.from_matrix(L_target.rotation), Rotation.from_matrix(L_test.rotation)
-            rot_seq = Rotation.from_matrix([R0.as_matrix(), R1.as_matrix()])
-            slerp = Slerp([0, 1], rot_seq)
-            # slerp = Slerp([0,1],[R0,R1])
-             # 平移：线性
-            for a in np.linspace(0, 1, 5):
-                rot = slerp(a).as_matrix()
+            # rot_seq = Rotation.from_matrix([R0.as_matrix(), R1.as_matrix()])
+            # slerp = Slerp([0, 1], rot_seq)
+            # # slerp = Slerp([0,1],[R0,R1])
+            #  # 平移：线性
+            # for a in np.linspace(0, 1, 5):
+            #     rot = slerp(a).as_matrix()
             #     print(f"[DEBUG] Current rotation: {rot}")
             # print(f"[DEBUG] End interpolation.")
 
