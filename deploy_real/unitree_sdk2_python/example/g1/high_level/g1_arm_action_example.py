@@ -4,7 +4,39 @@ from unitree_sdk2py.core.channel import ChannelSubscriber, ChannelFactoryInitial
 from unitree_sdk2py.g1.arm.g1_arm_action_client import G1ArmActionClient
 from unitree_sdk2py.g1.arm.g1_arm_action_client import action_map
 from dataclasses import dataclass
+from unitree_sdk2py.comm.motion_switcher import MotionSwitcherClient
 
+def queryServiceName(form: str, name: str) -> str:
+    if form == "0":
+        if name == "normal":
+            return "sport_mode"
+        if name == "ai":
+            return "ai_sport"
+        if name == "advanced":
+            return "advanced_sport"
+    else:
+        if name == "ai-w":
+            return "wheeled_sport(go2W)"
+        if name == "normal-w":
+            return "wheeled_sport(b2W)"
+    return ""
+    
+def queryMotionStatus(msc):
+    code, data = msc.CheckMode()
+    if code == 0:
+        print("CheckMode succeeded.")
+        print(data)
+    else:
+        print(f"CheckMode failed. Error code: {code}")
+
+    if not data["name"]:
+        print("The motion control-related service is deactivated.")
+        motionStatus = 0
+    else:
+        serviceName = queryServiceName(data["form"], data["name"])
+        print(f"Service: {serviceName} is activate")
+        motionStatus = 1
+    return motionStatus
 @dataclass
 class TestOption:
     name: str
@@ -74,8 +106,16 @@ if __name__ == "__main__":
     user_interface = UserInterface()
     user_interface.test_option_ = test_option
 
+    msc = MotionSwitcherClient()
+    msc.Init()
+    print("[DDS] Motion Switcher Client Initialized.")
+    while not queryMotionStatus(msc):
+        print("Waiting for motion service to be active...")
+    msc.SelectMode("ai")
+    time.sleep(5)
+
     armAction_client = G1ArmActionClient()  
-    armAction_client.SetTimeout(10.0)
+    armAction_client.SetTimeout(3.0)
     armAction_client.Init()
 
     # actionList = armAction_client.GetActionList()

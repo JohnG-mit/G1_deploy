@@ -22,10 +22,10 @@ import cyclonedds.idl.types as types
 @annotate.final
 @annotate.autoid("sequential")
 class IMUState_(idl.IdlStruct, typename="unitree_hg.msg.dds_.IMUState_"):
-    quaternion: types.array[types.float32, 4]
-    gyroscope: types.array[types.float32, 3]
-    accelerometer: types.array[types.float32, 3]
-    rpy: types.array[types.float32, 3]
-    temperature: types.int16
+    quaternion: types.array[types.float32, 4]  # 四元数 QwQxQyQz
+    gyroscope: types.array[types.float32, 3]  # 陀螺仪(角速度) omega_xyz
+    accelerometer: types.array[types.float32, 3]  # 加速度 acc_xyz
+    rpy: types.array[types.float32, 3]  # 欧拉角
+    temperature: types.int16  # IMU 温度
 
 
