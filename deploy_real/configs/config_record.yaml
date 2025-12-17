@@ -1,0 +1,63 @@
+control_dt: 0.02            # s
+num_joints: 29
+
+kps: [40, 40, 40, 150, 40, 40,
+      40, 40, 40, 150, 40, 40,
+      300, 300, 300,
+      40, 40, 40, 40, 40, 40, 40,
+      40, 40, 40, 40, 40, 40, 40]
+
+kds: [1,1,1, 1,1,1,
+      1,1,1, 1,1,1,
+      1,1,1,
+      1,1,1,1,1,1,1,
+      1,1,1,1,1,1,1]
+
+joint2motor_idx: [0, 1, 2, 3, 4,  5,
+                  6, 7, 8, 9, 10, 11,
+                  12, 13, 14, 
+                  15, 16, 17, 18, 19, 20, 21, 
+                  22, 23, 24, 25, 26, 27, 28]
+
+default_angles: [-0.089,-0.018,-0.006, 0.534,-0.422, 0.001,
+                -0.09 ,-0.008, 0.013, 0.531,-0.429, 0.004,
+                0, 0.   , 0.   ,
+                0.053, 0.486, 0.173, 1.249, 0.167,0.121,-0.032,
+                0.054,-0.434,-0.173, 1.249,-0.167, 0.121, 0.032]
+
+action_joints:
+  - 15      # L-ShoulderPitch
+  - 16      # L-ShoulderRoll
+  - 17      # L-ShoulderYaw
+  - 18      # L-Elbow
+
+  - 19      # L_WRIST_ROLL
+  - 20      # L_WRIST_PITCH
+  - 21      # L_WRIST_YAW
+
+  - 22      # R_SHOULDER_PITCH
+  - 23      # R_SHOULDER_ROLL
+  - 24      # R_SHOULDER_YAW
+  - 25      # R_ELBOW
+
+  - 26      # R_WRIST_ROLL
+  - 27      # R_WRIST_PITCH
+  - 28      # R_WRIST_YAW
+fixed_joints:
+  - 0       # L_LEG_HIP_PITCH
+  - 1       # L_LEG_HIP_ROLL
+  - 2       # L_LEG_HIP_YAW
+  - 3       # L_LEG_KNEE
+  - 4       # L_LEG_ANKLE_PITCH
+  - 5       # L_LEG_ANKLE_ROLL
+  - 6       # R_LEG_HIP_PITCH
+  - 7       # R_LEG_HIP_ROLL
+  - 8       # R_LEG_HIP_YAW
+  - 9       # R_LEG_KNEE
+  - 10      # R_LEG_ANKLE_PITCH
+  - 11      # R_LEG_ANKLE_ROLL
+  - 12      # WAIST_YAW
+  - 13      # WAIST_ROLL
+  - 14      # WAIST_PITCH
+
+stiffness_factor: 0.01

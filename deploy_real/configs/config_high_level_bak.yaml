@@ -1,0 +1,156 @@
+# New problem with wrist.
+# Out of index 
+# 所有字段名字与 python 中保持一致
+control_dt: 0.02            # s
+num_joints: 29
+
+# kps: [100, 100, 100, 150, 40, 40,
+#       100, 100, 100, 150, 40, 40,
+#       300, 300, 300,
+#       100, 100, 50, 50, 20, 20, 20,
+#       100, 100, 50, 50, 20, 20, 20,]
+
+kps: [40, 40, 40, 150, 40, 40,
+      40, 40, 40, 150, 40, 40,
+      300, 300, 300,
+      40, 40, 40, 40, 40, 40, 40,
+      40, 40, 40, 40, 40, 40, 40,]
+
+# kds: [2, 2, 2, 4, 2, 2,
+#       2, 2, 2, 4, 2, 2,
+#       3,3,3,
+#       2,2,2,2,1,1,1,
+#       2,2,2,2,1,1,1]
+
+kds: [1,1,1, 1,1,1,
+      1,1,1, 1,1,1,
+      1,1,1,
+      1,1,1,1,1,1,1,
+      1,1,1,1,1,1,1]
+
+joint2motor_idx: [0, 1, 2, 3, 4,  5,
+                  6, 7, 8, 9, 10, 11,
+                  12, 13, 14, 
+                  15, 16, 17, 18, 19, 20, 21, 
+                  22, 23, 24, 25, 26, 27, 28]
+
+default_angles: [-0.089,-0.018,-0.006, 0.534,-0.422, 0.001,-0.09 ,-0.008, 0.013, 0.531,
+ -0.429, 0.004, 0.005, 0.   , 0.   , 0.053, 0.486, 0.173, 1.249, 0.167,
+  0.121,-0.032, 0.054,-0.434,-0.383, 1.249,-0.508, 0.206, 0.003
+                  ]
+
+action_joints:
+  - 0       # L_LEG_HIP_PITCH
+  - 1       # L_LEG_HIP_ROLL
+  - 2       # L_LEG_HIP_YAW
+  - 3       # L_LEG_KNEE
+  - 4       # L_LEG_ANKLE_PITCH
+  - 5       # L_LEG_ANKLE_ROLL
+  - 6       # R_LEG_HIP_PITCH
+  - 7       # R_LEG_HIP_ROLL
+  - 8       # R_LEG_HIP_YAW
+  - 9       # R_LEG_KNEE
+  - 10      # R_LEG_ANKLE_PITCH
+  - 11      # R_LEG_ANKLE_ROLL
+  - 12      # WAIST_YAW
+  - 13      # WAIST_ROLL
+  - 14      # WAIST_PITCH
+  - 15      # L-ShoulderPitch
+  - 16      # L-ShoulderRoll
+  - 17      # L-ShoulderYaw
+  - 18      # L-Elbow
+
+  - 19      # L_WRIST_ROLL
+  - 20      # L_WRIST_PITCH
+  - 21      # L_WRIST_YAW
+
+  - 22      # R_SHOULDER_PITCH
+  - 23      # R_SHOULDER_ROLL
+  - 24      # R_SHOULDER_YAW
+  - 25      # R_ELBOW
+
+  - 26      # R_WRIST_ROLL
+  - 27      # R_WRIST_PITCH
+  - 28      # R_WRIST_YAW
+fixed_joints:               # 6 wrists to lock
+  # - 19 # left_roll
+  # - 20 # left_wrist_pitch
+  # - 21 # left_wrist_yaw
+  # - 26 # right_wrist_roll
+  # - 27 # right_wrist_pitch
+  # - 28 # right_wrist_yaw
+
+  # - 12  # WaistYaw
+  # - 13  # WaistRoll
+  # - 14  # WaistPitch
+
+# fixed_target: [-0.05, 0.12, -0.03, -0.16, 0.12, -0.02]
+# fixed_kps   : [60, 60, 60, 60, 60, 60]
+# fixed_kds   : [1, 1, 1, 1, 1, 1]
+fixed_target: [0.12, 0.12, 
+               0.0, 0.0, 0.0,] 
+
+fixed_kps   : [60, 60, 
+              300, 300, 300,]
+fixed_kds   : [1, 1,
+              5, 5, 5,]
+
+kps_play: [100, 100, 50, 50,
+            60, 60, 
+           100, 100, 50, 50, 
+          # 300,300,300, 
+            60, 60]
+kds_play: [ 2, 2, 2, 2,
+            1, 1,
+            2, 2, 2, 2,   
+          # 5,  5,  5,
+            1, 1]
+
+stiffness_factor: 0.01
+stiffness_factor_waist_rp: 0.5
+
+# # old working file 
+# # 所有字段名字与 python 中保持一致
+# control_dt: 0.02            # s
+
+# action_joints:              # 17 DOF（索引写数字）
+#   - 15  # L-ShoulderPitch
+#   - 16  # L-ShoulderRoll
+#   - 17  # L-ShoulderYaw
+#   - 18  # L-Elbow
+#   - 22  # R-ShoulderPitch
+#   - 23  # R-ShoulderRoll
+#   - 24  # R-ShoulderYaw
+#   - 25  # R-Elbow
+#   - 12  # WaistYaw
+#   - 13  # WaistRoll
+#   - 14  # WaistPitch
+  
+#   - 19 # left_roll
+#   - 26 # right_roll
+
+# fixed_joints:               # 6 wrists to lock
+#   # - 19 # left_roll
+#   - 20 # left_pitch
+#   - 21 # left_yaw
+#   # - 26 # right_roll
+#   - 27 # right_pitch
+#   - 28 # right_yaw
+
+# # fixed_target: [-0.05, 0.12, -0.03, -0.16, 0.12, -0.02]
+# # fixed_kps   : [60, 60, 60, 60, 60, 60]
+# # fixed_kds   : [1, 1, 1, 1, 1, 1]
+# fixed_target: [0.12, -0.03, 0.12, -0.02]
+# fixed_kps   : [60, 60, 60, 60]
+# fixed_kds   : [1, 1, 1, 1]
+
+# kps_play: [100,100,50,50, 100,100,50,50, 300,300,300, 
+#             60, 60]
+# kds_play: [  2,  2, 2, 2,   2,  2, 2, 2,   5,  5,  5,
+#             1, 1]
+
+# stiffness_factor: 0.01
+# stiffness_factor_waist_rp: 0.5
+
+# default_angles: [0.2,0.2,0.0,0.9, 0.2,-0.2,0.0,0.9, 0.0,0.0,0.0,
+#                   -0.05, -0.16]

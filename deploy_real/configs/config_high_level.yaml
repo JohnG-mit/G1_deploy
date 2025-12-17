@@ -2,89 +2,37 @@
 # Out of index 
 # 所有字段名字与 python 中保持一致
 control_dt: 0.02            # s
-num_joints: 29
-
-# kps: [100, 100, 100, 150, 40, 40,
-#       100, 100, 100, 150, 40, 40,
-#       300, 300, 300,
-#       100, 100, 50, 50, 20, 20, 20,
-#       100, 100, 50, 50, 20, 20, 20,]
-
-kps: [40, 40, 40, 150, 40, 40,
-      40, 40, 40, 150, 40, 40,
-      300, 300, 300,
-      40, 40, 40, 40, 40, 40, 40,
-      40, 40, 40, 40, 40, 40, 40,]
-
-# kds: [2, 2, 2, 4, 2, 2,
-#       2, 2, 2, 4, 2, 2,
-#       3,3,3,
-#       2,2,2,2,1,1,1,
-#       2,2,2,2,1,1,1]
-
-kds: [1,1,1, 1,1,1,
-      1,1,1, 1,1,1,
-      1,1,1,
-      1,1,1,1,1,1,1,
-      1,1,1,1,1,1,1]
-
-joint2motor_idx: [0, 1, 2, 3, 4,  5,
-                  6, 7, 8, 9, 10, 11,
-                  12, 13, 14, 
-                  15, 16, 17, 18, 19, 20, 21, 
-                  22, 23, 24, 25, 26, 27, 28]
-
-default_angles: [-0.026,  0.0,  0.0,  0.25, -0.10, 0.0, 
-                 -0.026,  0.0,  0.0,  0.25, -0.10, 0.0,
-                  0, 0, 0,
-                  0.10, 0.10, 0, 1.20, 0, 0.1, 0.1,
-                  0.10, 0.10, 0, 1.20, 0, 0.1, 0.1,
-                  ]
 
 action_joints:              # 17 DOF（索引写数字）
-  - 0
-  - 1
-  - 2
-  - 3
-  - 4
-  - 5
-  - 6
-  - 7
-  - 8
-  - 9
-  - 10
-  - 11
-  - 12  # WaistYaw
-  - 13  # WaistRoll
-  - 14  # WaistPitch
   - 15  # L-ShoulderPitch
   - 16  # L-ShoulderRoll
   - 17  # L-ShoulderYaw
   - 18  # L-Elbow
 
-  - 19 # left_wrist_roll
-  - 20 # left_wrist_pitch
-  - 21 # left_wrist_yaw
+  - 19 # left_roll
+  - 21 # left_yaw
   
   - 22  # R-ShoulderPitch
   - 23  # R-ShoulderRoll
   - 24  # R-ShoulderYaw
   - 25  # R-Elbow
-  
-  - 26 # right_wrist_roll
-  - 27 # right_wrist_pitch
-  - 28 # right_wrist_yaw
-fixed_joints:               # 6 wrists to lock
-  # - 19 # left_roll
-  # - 20 # left_wrist_pitch
-  # - 21 # left_wrist_yaw
-  # - 26 # right_wrist_roll
-  # - 27 # right_wrist_pitch
-  # - 28 # right_wrist_yaw
-
   # - 12  # WaistYaw
   # - 13  # WaistRoll
   # - 14  # WaistPitch
+  
+  - 26 # right_roll
+  - 28 # right_yaw
+fixed_joints:               # 6 wrists to lock
+  # - 19 # left_roll
+  - 20 # left_pitch
+  # - 21 # left_yaw
+  # - 26 # right_roll
+  - 27 # right_pitch
+  # - 28 # right_yaw
+
+  - 12  # WaistYaw
+  - 13  # WaistRoll
+  - 14  # WaistPitch
 
 # fixed_target: [-0.05, 0.12, -0.03, -0.16, 0.12, -0.02]
 # fixed_kps   : [60, 60, 60, 60, 60, 60]
@@ -110,6 +58,13 @@ kds_play: [ 2, 2, 2, 2,
 
 stiffness_factor: 0.01
 stiffness_factor_waist_rp: 0.5
+
+default_angles: [0.2, 0.2, 0.0, 0.9, 
+                 -0.05, -0.16,
+                 0.2, -0.2, 0.0, 0.9, 
+                  # 0.0,0.0,0.0,
+                 -0.03, -0.02,]
+
 
 # # old working file 
 # # 所有字段名字与 python 中保持一致
