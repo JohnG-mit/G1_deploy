@@ -1,6 +1,6 @@
 import pyqtgraph as pg
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QGridLayout,QLabel,QVBoxLayout
+from PySide6 import QtCore
+from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QGridLayout,QLabel,QVBoxLayout
 from .inspire_hand_defaut import *
 import colorcet  # 确保安装 colorcet 库
 import numpy as np
