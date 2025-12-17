@@ -51,7 +51,7 @@ class G1ArmActionClient(Client):
     ## API Call ##
     def ExecuteAction(self, action_id: int):
         p = {}
-        p["data"] = action_id
+        p["action_id"] = action_id
         parameter = json.dumps(p)
         code, data = self._Call(ROBOT_API_ID_ARM_ACTION_EXECUTE_ACTION, parameter)
         return code
@@ -65,10 +65,10 @@ class G1ArmActionClient(Client):
         else:
             return code, None
 
-# ChannelFactoryInitialize(0, sys.argv[1] if len(sys.argv) > 1 else "")
-# armc = G1ArmActionClient()
-# armc.Init()
-# code, action_list = armc.GetActionList()
-# print(action_list)
-# res = armc.ExecuteAction(action_map["shake hand"])
-# print(res)
+ChannelFactoryInitialize(0, sys.argv[1] if len(sys.argv) > 1 else "")
+armc = G1ArmActionClient()
+armc.Init()
+code, action_list = armc.GetActionList()
+print(code, action_list)
+res = armc.ExecuteAction(action_map["shake hand"])
+print(res)
