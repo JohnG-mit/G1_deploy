@@ -1,0 +1,4 @@
+# Sensor
+```{toctree}
+camera
+```

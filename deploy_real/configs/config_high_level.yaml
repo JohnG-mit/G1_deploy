@@ -9,8 +9,8 @@ action_joints:              # 17 DOF（索引写数字）
   - 17  # L-ShoulderYaw
   - 18  # L-Elbow
 
-  - 19 # left_roll
-  - 21 # left_yaw
+  - 19 # left_wrist_roll
+  - 21 # left_wrist_yaw
   
   - 22  # R-ShoulderPitch
   - 23  # R-ShoulderRoll
@@ -20,15 +20,15 @@ action_joints:              # 17 DOF（索引写数字）
   # - 13  # WaistRoll
   # - 14  # WaistPitch
   
-  - 26 # right_roll
-  - 28 # right_yaw
+  - 26 # right_wrist_roll
+  - 28 # right_wrist_yaw
 fixed_joints:               # 6 wrists to lock
-  # - 19 # left_roll
-  - 20 # left_pitch
-  # - 21 # left_yaw
-  # - 26 # right_roll
-  - 27 # right_pitch
-  # - 28 # right_yaw
+  # - 19 # left_wrist_roll
+  - 20 # left_wrist_pitch
+  # - 21 # left_wrist_yaw
+  # - 26 # right_wrist_roll
+  - 27 # right_wrist_pitch
+  # - 28 # right_wrist_yaw
 
   - 12  # WaistYaw
   - 13  # WaistRoll

@@ -13,7 +13,7 @@ from unitree_sdk2py.utils.thread import Thread
 from inspire_sdkpy import inspire_sdk, inspire_hand_defaut,inspire_dds
 
 handler=inspire_sdk.ModbusDataHandler(ip='192.168.123.210',LR='l',device_id=1)
-# handler=inspire_sdk.ModbusDataHandler(ip='192.168.123.211',LR='r',device_id=1)
+#handler=inspire_sdk.ModbusDataHandler(ip='192.168.123.211',LR='r',device_id=1)
 states_structure = [
     ('pos_act', 1534, 6, 'short'),
     ('angle_act', 1546, 6, 'short'),
@@ -65,7 +65,7 @@ angle_register = {
 # handler.client.write_registers(user_def_angle[14][0], [0,0,0,0,1000,1000], handler.device_id)
 # handler.client.write_registers(user_def_angle[15][0], [1000,1000,1000,1000,1000,1000], handler.device_id)
 time.sleep(1)
-handler.client.write_register(1008, 14, handler.device_id)
+handler.client.write_register(1008, 12, handler.device_id)
 
 
 # handler.client.write_register(gesture_no_set[0], 8, handler.device_id)

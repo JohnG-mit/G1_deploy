@@ -11,14 +11,14 @@ def get_target_pose_in_base_frame(T_base_camera, T_camera_object, T_grasp_offset
         T_grasp_offset (np.array): 4x4 矩阵, 期望的抓取点相对于物体的位姿 (默认为重合)
         
     Returns:
-        T_base_target (np.array): 4x4 矩阵, 传给 IK 的目标位姿
+        T_base_target (np.array): 4x4 矩阵, 目标物体在机器人基坐标系下的位姿
     """
-    if T_grasp_offset is None:
-        T_grasp_offset = np.eye(4)
-
     # 链式变换: Base -> Camera -> Object -> GraspTarget
     T_base_object = T_base_camera @ T_camera_object
-    T_base_target = T_base_object @ T_grasp_offset
+    if T_grasp_offset is None:
+        return T_base_object
+    else:
+        T_base_target = T_base_object @ T_grasp_offset
     
     return T_base_target
 
@@ -102,6 +102,7 @@ def get_camera_pose_in_base_frame(waist_yaw=0.0, waist_roll=0.0, waist_pitch=0.0
     
     return T_base_optical
 
+
 def plot_coordinate_frame(ax, T, label, scale=0.1):
     """辅助函数：绘制坐标系"""
     origin = T[:3, 3]
@@ -113,6 +114,7 @@ def plot_coordinate_frame(ax, T, label, scale=0.1):
     ax.quiver(origin[0], origin[1], origin[2], y_axis[0], y_axis[1], y_axis[2], color='g', length=scale, normalize=True)
     ax.quiver(origin[0], origin[1], origin[2], z_axis[0], z_axis[1], z_axis[2], color='b', length=scale, normalize=True)
     ax.text(origin[0], origin[1], origin[2], label)
+
 
 if __name__ == "__main__":
     # 打印静态变换矩阵 (假设腰部角度为0)

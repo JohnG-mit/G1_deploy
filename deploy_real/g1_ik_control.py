@@ -1,4 +1,4 @@
-import time, sys, json, pathlib
+import time, sys, json, pathlib, copy
 import numpy as np
 import yaml, pinocchio as pin
 from scipy.spatial.transform import Rotation, Slerp
@@ -93,7 +93,9 @@ class G1HighlevelArmController:
         self.sub = ChannelSubscriber("rt/lowstate", LowState_); self.sub.Init(self._cb, 10)
         print("[DDS] Arm Publisher & Subscriber ready.")
         self.lh_angle = [0, 0, 0, 0, 0, 1000]  # Left hand finger angles
+        self.lh_state = False
         self.rh_angle = [0, 0, 0, 0, 0, 1000]  # Right hand finger angles
+        self.rh_state = False
         self.hand_control_lock = Lock()
         self.lh_cmd = get_inspire_hand_ctrl()
         self.rh_cmd = get_inspire_hand_ctrl()
@@ -127,14 +129,11 @@ class G1HighlevelArmController:
         self.loco_client = LocoClient()
         self.loco_client.Init()
         self.enter_fix_stand()
-
-        # Hand controller
-        # self.dex3 = Dex3GestureController(fps=30.0)
-        # self.dex3.switch_gesture(HandGesture.DEFAULT)  # the default state is close hand.
         
         # --- control param ---
         self.mode         = Mode.IDLE
         self.target_q     = cfg.default_angles.copy()
+        self.target_tau   = 0.0
         self.kps = np.zeros_like(cfg.kps_play)
         self.kds = np.ones_like(cfg.kds_play)
 
@@ -207,19 +206,19 @@ class G1HighlevelArmController:
         kds = np.asarray(kds if kds is not None else self.kds)
 
         for i, m in enumerate(cfg.action_joints):
-            self.low_cmd.motor_cmd[m].q  = float(q[i])
-            self.low_cmd.motor_cmd[m].dq = 0.0
-            self.low_cmd.motor_cmd[m].kp = float(kps[i])
-            self.low_cmd.motor_cmd[m].kd = float(kds[i])
-            self.low_cmd.motor_cmd[m].tau= 0.0
+            self.low_cmd.motor_cmd[m].q   = float(q[i])
+            self.low_cmd.motor_cmd[m].dq  = 0.0
+            self.low_cmd.motor_cmd[m].kp  = float(kps[i])
+            self.low_cmd.motor_cmd[m].kd  = float(kds[i])
+            self.low_cmd.motor_cmd[m].tau = 0.0
 
         # fixed joint value. 
         for i, m in enumerate(cfg.fixed_joints):
-            self.low_cmd.motor_cmd[m].q  = float(cfg.fixed_target[i])
-            self.low_cmd.motor_cmd[m].dq = 0.0
-            self.low_cmd.motor_cmd[m].kp = float(cfg.fixed_kps[i])
-            self.low_cmd.motor_cmd[m].kd = float(cfg.fixed_kds[i])
-            self.low_cmd.motor_cmd[m].tau= 0.0
+            self.low_cmd.motor_cmd[m].q   = float(cfg.fixed_target[i])
+            self.low_cmd.motor_cmd[m].dq  = 0.0
+            self.low_cmd.motor_cmd[m].kp  = float(cfg.fixed_kps[i])
+            self.low_cmd.motor_cmd[m].kd  = float(cfg.fixed_kds[i])
+            self.low_cmd.motor_cmd[m].tau = 0.0
 
         self.low_cmd.motor_cmd[G1JointIndex.kNotUsedJoint].q = 1
         self.low_cmd.crc = self.crc.Crc(self.low_cmd)
@@ -307,7 +306,7 @@ class G1HighlevelArmController:
         return: q   : arm motor joint state (n-joints)
         '''
         q_now = self.current_q()
-        q_cmd, _ = self.ik.solve_ik(poseL.homogeneous, poseR.homogeneous, current_lr_arm_motor_q=q_now)
+        q_cmd, tau_cmd = self.ik.solve_ik(poseL.homogeneous, poseR.homogeneous, current_lr_arm_motor_q=q_now)
         return q_cmd
 
     def move_to(self, poseL: pin.SE3, poseR: pin.SE3,
@@ -343,21 +342,23 @@ class G1HighlevelArmController:
         Move the two arm to default position.
         param:  duration: float
         '''
-        pos_L = np.array([ 0.10571,  0.18578, -0.10308], dtype=float)
-        rot_L = np.array([
-            [ 0.4695 ,  0.384  ,  0.79506],
-            [ 0.0372 ,  0.89107, -0.45234],
-            [-0.88215,  0.24195,  0.40407],
-        ], dtype=float)
+        # pos_L = np.array([ 0.10571,  0.18578, -0.10308], dtype=float)
+        # rot_L = np.array([
+        #     [ 0.4695 ,  0.384  ,  0.79506],
+        #     [ 0.0372 ,  0.89107, -0.45234],
+        #     [-0.88215,  0.24195,  0.40407],
+        # ], dtype=float)
 
-        pos_R = np.array([ 0.12127, -0.20089, -0.08074], dtype=float)
-        rot_R = np.array([
-            [ 0.62136, -0.28825,  0.72857],
-            [-0.13909,  0.87452,  0.46462],
-            [-0.77108, -0.39004,  0.5033 ],
-        ], dtype=float)
-        poseL_def = pin.SE3(rot_L, pos_L)
-        poseR_def = pin.SE3(rot_R, pos_R)
+        # pos_R = np.array([ 0.12127, -0.20089, -0.08074], dtype=float)
+        # rot_R = np.array([
+        #     [ 0.62136, -0.28825,  0.72857],
+        #     [-0.13909,  0.87452,  0.46462],
+        #     [-0.77108, -0.39004,  0.5033 ],
+        # ], dtype=float)
+        # poseL_def = pin.SE3(rot_L, pos_L)
+        # poseR_def = pin.SE3(rot_R, pos_R)
+        default_q = np.array([-0.06300107389688492, 1.6363739967346191, 0.06309694796800613, 1.433660864830017, -0.06913699209690094, -0.01609145849943161, -0.023728765547275543, -1.5769442319869995, -0.06358829885721207, 1.4105912446975708, 0.04851214215159416, 0.04398690164089203])
+        poseL_def, poseR_def = self.FK(default_q)
         
         # poseL_def, poseR_def = self.FK(cfg.default_angles)  
 
@@ -368,6 +369,22 @@ class G1HighlevelArmController:
                     ws_steps=int(duration/2/cfg.control_dt),
                     jnt_steps=int(duration/2/cfg.control_dt))
         print(f"[HOLD] Move to default.")
+    
+    def move_to_quit(self, duration=3.0):
+        '''
+        Move the two arm to quit position.
+        param:  duration: float
+        '''
+        quit_q = np.array([0.053, 0.486, 0.173, 1.249, 0.167, -0.032, 0.054, -0.434, -0.173, 1.249, -0.167, 0.032])
+        poseL_quit, poseR_quit = self.FK(quit_q)
+
+        self.kps = cfg.kps_play.copy() * 0.5 # when moving to default, use a more smaller kp for safty.
+        self.kds = cfg.kds_play.copy() 
+        
+        self.move_to(poseL_quit, poseR_quit,
+                    ws_steps=int(duration/2/cfg.control_dt),
+                    jnt_steps=int(duration/2/cfg.control_dt))
+        print(f"[HOLD] Move to quit pose.")
 
 
     def _interpolate_pose(self, T0: pin.SE3, T1: pin.SE3, n: int):
@@ -540,6 +557,11 @@ class G1HighlevelArmController:
 
     def stop(self):
         print("[HL] stopping controller…")
+        self.move_to_default(duration=3)
+        self.move_to_quit(duration=3.0)
+        self._close_hand('l')
+        self._close_hand('r')
+        time.sleep(5.0)
         self.damping_mode(kd=2)
         # self.dex3.zero_torque()
         # self.dex3.running = False
@@ -600,6 +622,10 @@ class G1HighlevelArmController:
                 self._send_hand_joint('l')
                 self._send_hand_joint('r')
                 # self._replay_idx += 1
+        elif self.mode == Mode.DEBUG:
+            self._send_joint(self.target_q, kps=self.kps, kds=self.kds)  
+            self._send_hand_joint('l')
+            self._send_hand_joint('r')
 
         # in recording mode, store the data in to the buffer.
         if self._recording:
@@ -794,11 +820,23 @@ class G1HighlevelArmController:
         
         # R1- hand grasp motion 
         if r[KeyMap.R1] == 1:
-            self._close_hand('l')
+            if self.lh_state is False:
+                self.lh_state = True
+                self._open_hand('l')
+            else:
+                self.lh_state = False
+                self._close_hand('l')
+                
             # self.dex3.switch_gesture(HandGesture.GRIP)
         # L1- hand release motion
         if r[KeyMap.R2] == 1:
-            self._open_hand('l')
+            if self.rh_state is False:
+                self.rh_state = True
+                self._open_hand('r')
+            else:
+                self.rh_state = False
+                self._close_hand('r')
+                
             # self.dex3.switch_gesture(HandGesture.RELEASE)
 
         # # play one motion sequence    
@@ -851,7 +889,7 @@ class G1HighlevelArmController:
         if r[KeyMap.Y] ==1:      
             # self.dex3.damping()
             self.zero_torque_mode()
-            print(f"[HOLD] Move to zero torque.")
+            # print(f"[HOLD] Move to zero torque.")
 
         # update the prev button.
         self.prev_buttons[:] = r
@@ -893,8 +931,12 @@ def main():
                         else:
                             print("[CMD] unknown motion:", cmd); continue
                     print(f"[CMD] selected #{ctrl._sel_motion_idx} {ctrl.motion_names[ctrl._sel_motion_idx]}")
-            ctrl.remote_poll() 
-            # time.sleep(0.02)
+            
+            # 检查是否处于debug模式，避免与debug输入冲突
+            if not (hasattr(ctrl, 'debug_mode_active') and ctrl.debug_mode_active):
+                ctrl.remote_poll()
+            else:
+                time.sleep(0.02)  # debug模式下短暂休眠，避免CPU占用过高
     except KeyboardInterrupt:
         ctrl.stop()
         print("User exit, stopping thread…")

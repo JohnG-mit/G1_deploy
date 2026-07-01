@@ -23,11 +23,16 @@ if __name__ == "__main__":
     SINGLE_FRAME = False
     LINER_VELOCITY = False
   
-    policy_path = "/home/bbw/rl_g1_punch/deploy/guangming/StraightPunch_domain_model_22000.onnx"
+    # 此处做了更改，注释掉了guangming的模型（2026.1.10 15：24）
+    #policy_path = "/home/bbw/rl_g1_punch/deploy/guangming/StraightPunch_domain_model_22000.onnx"
     #policy_path = "/home/bbw/rl_g1_punch/deploy/edpsw/g1_23_model_94900.onnx"
     #xml_path = "/home/bbw/rl_g1_punch/deploy/edpsw/g1_29dof_anneal_23dof.xml"
-    xml_path = "/home/bbw/rl_g1_punch/resources/robots/g1_description/g1_23dof.xml"
-
+    #xml_path = "/home/bbw/rl_g1_punch/resources/robots/g1_description/g1_23dof.xml"
+    import os
+    # 使用当前目录下的模型文件
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    policy_path = os.path.join(current_dir, "g1_23_model_94900.onnx")
+    xml_path = os.path.join(current_dir, "g1_29dof_anneal_23dof.xml")
     
     print("policy_path: ", policy_path)
     print("xml_path   : ", xml_path)
